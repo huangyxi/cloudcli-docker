@@ -1,0 +1,16 @@
+services:
+  cloudcli:
+    container_name: ${CONTAINER_NAME:-cloudcli}
+    image: ghcr.io/huangyxi/cloudcli:latest
+    userns_mode: keep-id
+    ports:
+      - "${SERVER_PORT:-3001}:3001"
+    environment:
+      - HOST_UID=${HOST_UID:-1000}
+      - HOST_GID=${HOST_GID:-1000}
+    volumes:
+      - ./workspace:/home/node:Z
+      - ./claude:/home/node/.claude:Z
+      - ./cloudcli-config:/home/node/.cloudcli:Z
+      # - ./cloudcli-workspace-scheduled-prompts:/home/node/.cloudcli-workspace-scheduled-prompts:Z
+    restart: unless-stopped

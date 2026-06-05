@@ -36,6 +36,7 @@ EOF
 
 
 FROM	build AS plugin-builder
+RUN	mkdir -p ${PLUGINS_DIR}
 WORKDIR	${PLUGINS_DIR}
 ADD	https://github.com/cloudcli-ai/cloudcli-plugin-terminal.git ${PLUGINS_DIR}/
 RUN	--mount=type=cache,target=/root <<EOF

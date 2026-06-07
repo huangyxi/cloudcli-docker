@@ -7,7 +7,7 @@ ARG	NODE_VERSION="24"
 ARG	APP_DIR="/app" PLUGINS_DIR="/opt/_cloudcli_plugins"
 ARG	VITE_IS_PLATFORM=true
 
-FROM	node:${NODE_VERSION}-slim AS base
+FROM	node:${NODE_VERSION}-trixie-slim AS base
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
 	apt-get update
@@ -20,7 +20,8 @@ ARG	VITE_IS_PLATFORM
 FROM	base AS build
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
-	apt-get --no-install-recommends install -y g++
+	apt-get update
+	apt-get --no-install-recommends install -y make g++
 EOF
 
 

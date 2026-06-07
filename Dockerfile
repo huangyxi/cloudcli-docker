@@ -7,18 +7,18 @@ ARG	NODE_VERSION="26"
 ARG	APP_DIR="/app" PLUGINS_DIR="/opt/_cloudcli_plugins"
 ARG	VITE_IS_PLATFORM=true
 
-FROM	debian:trixie-slim AS base
+FROM	node:${NODE_VERSION}-trixie-slim AS base
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
 	apt-get update
 	apt-get --no-install-recommends install -y ca-certificates git python3 curl vim
 EOF
-ARG	NODE_VERSION
-RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
-	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
-	curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
-	apt-get --no-install-recommends install -y nodejs
-EOF
+# ARG	NODE_VERSION
+# RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
+# 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
+# 	curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
+# 	apt-get --no-install-recommends install -y nodejs
+# EOF
 ARG	APP_DIR PLUGINS_DIR
 ARG	VITE_IS_PLATFORM
 
@@ -75,6 +75,8 @@ COPY	--from=app-builder --link ${APP_DIR} ${APP_DIR}
 COPY	--from=plugin-builder --link ${PLUGINS_DIR} ${PLUGINS_DIR}
 
 EXPOSE	3001
+
+USER	node
 
 ENV	PLUGINS_DIR=${PLUGINS_DIR}
 COPY	--link ./entrypoint.sh /

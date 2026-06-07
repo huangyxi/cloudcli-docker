@@ -45,6 +45,7 @@ RUN	<<EOF
 	npm install --prefix ${APP_DIR} "${PACKFILE}"
 	rm -rf ${TMP_DIR}
 EOF
+RUN	echo "VITE_IS_PLATFORM=${VITE_IS_PLATFORM}" > ${APP_DIR}/node_modules/@cloudcli-ai/cloudcli/.env
 
 
 FROM	build AS plugin-builder
@@ -82,4 +83,4 @@ ENV	PLUGINS_DIR=${PLUGINS_DIR}
 COPY	--link ./entrypoint.sh /
 ENTRYPOINT	["/entrypoint.sh"]
 
-CMD	env VITE_IS_PLATFORM=${VITE_IS_PLATFORM} /app/node_modules/.bin/cloudcli
+CMD	["/app/node_modules/.bin/cloudcli"]

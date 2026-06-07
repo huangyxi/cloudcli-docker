@@ -1,0 +1,44 @@
+name: Sync Upstream Tags
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  sync-tags:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to push new tags to your repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to fetch all local tags for comparison
+
+      - name: Check and sync upstream tags
+        env:
+          UPSTREAM_REPO: "siteboon/claudecodeui"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_UPSTREAM_TAG=$(gh api repos/$UPSTREAM_REPO/tags --jq '.[0].name')
+
+          if [ -z "$LATEST_UPSTREAM_TAG" ] || [ "$LATEST_UPSTREAM_TAG" == "null" ]; then
+          	echo "No tags found in upstream."
+          	exit 0
+          fi
+
+          if git rev-parse "refs/tags/$LATEST_UPSTREAM_TAG" >/dev/null 2>&1; then
+          	echo "Tag $LATEST_UPSTREAM_TAG already exists locally. Nothing to do."
+          else
+          	echo "New tag found: $LATEST_UPSTREAM_TAG. Tagging current repository..."
+
+          	# Configure git identity for the Actions bot
+          	git config user.name "github-actions[bot]"
+          	git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          	# Create and push the tag to the current commit
+          	git tag "$LATEST_UPSTREAM_TAG"
+          	git push origin "$LATEST_UPSTREAM_TAG"
+          fi

@@ -32,7 +32,6 @@ jobs:
       - name: Prepare environment variables
         run: |
           echo "FULL_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
-          echo "CACHE_TAG=cache-${{ matrix.platform.arch }}" >> $GITHUB_ENV
       - name: Extract metadata for Docker images
         id: meta
         uses: docker/metadata-action@v6
@@ -43,6 +42,17 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+      - name: Extract metadata for Docker cache
+        id: cache-meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.FULL_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            ${{ github.ref_type == 'tag' && 'type=raw,value=main' || '' }}
+          flavor: |
+            prefix=cache-${{ matrix.platform.arch }}-
+            latest=false
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
@@ -66,15 +76,22 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.CACHE_TAG }}
-          cache-to: type=registry,ref=${{ env.CACHE_TAG }},mode=max
+          cache-from: type=registry,ref=${{ steps.cache-meta.outputs.tags }}
+          cache-to: type=registry,ref=${{ steps.cache-meta.outputs.tags }},mode=max
 
-  delete-untagged-images:
-    name: Delete Untagged Images
+  delete-images:
+    name: Delete Unused Images from GHCR
     runs-on: ubuntu-latest
     permissions:
       packages: write
     steps:
-      - uses: dataaxiom/ghcr-cleanup-action@v1
+      - name: Delete untagged images from GHCR
+        uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           package: cloudcli
+      - name: Delete cache images from GHCR
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: cloudcli
+          delete-tags: 'cache-*'
+          keep-n-tagged: 6

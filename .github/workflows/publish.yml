@@ -1,6 +1,8 @@
 name: Build and Publish to GHCR
 
 on:
+  schedule:
+    - cron: '0 1 * * *' # Runs daily at 01:00 UTC, after the Sync Upstream Tags workflow for cache optimization
   push:
     branches:
       - main

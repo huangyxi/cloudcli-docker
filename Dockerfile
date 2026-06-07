@@ -30,8 +30,8 @@ ARG	TMP_DIR=/tmp/app
 ARG	LOCAL_CLOUDCLI_PATH
 ADD	${LOCAL_CLOUDCLI_PATH} ${TMP_DIR}
 WORKDIR	${TMP_DIR}
-RUN	--mount=type=cache,target=/root <<EOF
-	npm ci
+RUN	<<EOF
+	npm install
 	npm run build
 	PACKFILE=$(npm pack --silent)
 	echo "${PACKFILE}"
@@ -60,7 +60,7 @@ FROM	base
 COPY	--from=app-builder --link ${APP_DIR} ${APP_DIR}
 COPY	--from=plugin-builder --link ${PLUGINS_DIR} ${PLUGINS_DIR}
 
-RUN	--mount=type=cache,target=/root <<EOF
+RUN	<<EOF
 	npm install -g @anthropic-ai/claude-code task-master-ai
 	npm cache clean --force
 EOF
@@ -69,7 +69,7 @@ EXPOSE	3001
 
 ENV	PLUGINS_DIR=${PLUGINS_DIR}
 ENV	HOST_UID=1000 HOST_GID=1000
-COPY	--link --chmod=+x ./entrypoint.sh /entrypoint.sh
+COPY	--link ./entrypoint.sh /
 ENTRYPOINT	["/entrypoint.sh"]
 
-CMD	su - node -c VITE_IS_PLATFORM=${VITE_IS_PLATFORM} npx cloudcli
+CMD	su - node -c "VITE_IS_PLATFORM=${VITE_IS_PLATFORM} /app/node_modules/.bin/cloudcli"

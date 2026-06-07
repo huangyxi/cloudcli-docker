@@ -2,7 +2,7 @@
 set -e
 
 HOME=/home/node
-PLUGIN_PREFIX="_baked-"
+PLUGIN_PREFIX="_baked_"
 PLUGINS_DEST="${HOME}/.claude-code-ui/plugins"
 PLUGINS_DIR=${PLUGINS_DIR:-/plugins}
 HOST_UID=${HOST_UID:-1000}
@@ -19,7 +19,9 @@ if [ "$(stat -c '%u' ${HOME})" -ne "$(id -u node)" ] || [ "$(stat -c '%g' ${HOME
 	chown -R node:node ${HOME}
 fi
 
-alias run_as_node='su - node -c'
+run_as_node() {
+	su - node -c "$*"
+}
 
 run_as_node mkdir -p "$PLUGINS_DEST"
 

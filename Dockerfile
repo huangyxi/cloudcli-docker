@@ -57,13 +57,13 @@ EOF
 
 
 FROM	base
-COPY	--from=app-builder --link ${APP_DIR} ${APP_DIR}
-COPY	--from=plugin-builder --link ${PLUGINS_DIR} ${PLUGINS_DIR}
-
 RUN	<<EOF
 	npm install -g @anthropic-ai/claude-code task-master-ai
 	npm cache clean --force
 EOF
+
+COPY	--from=app-builder --link ${APP_DIR} ${APP_DIR}
+COPY	--from=plugin-builder --link ${PLUGINS_DIR} ${PLUGINS_DIR}
 
 EXPOSE	3001
 

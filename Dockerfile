@@ -11,7 +11,7 @@ FROM	debian:trixie-slim AS base
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
 	apt-get update
-	apt-get --no-install-recommends install -y ca-certificates git python3 curl
+	apt-get --no-install-recommends install -y ca-certificates git python3 curl vim
 EOF
 ARG	NODE_VERSION
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -80,4 +80,4 @@ ENV	PLUGINS_DIR=${PLUGINS_DIR}
 COPY	--link ./entrypoint.sh /
 ENTRYPOINT	["/entrypoint.sh"]
 
-CMD	su - ${USER} -c "VITE_IS_PLATFORM=${VITE_IS_PLATFORM} /app/node_modules/.bin/cloudcli"
+CMD	env VITE_IS_PLATFORM=${VITE_IS_PLATFORM} /app/node_modules/.bin/cloudcli

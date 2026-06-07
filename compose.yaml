@@ -2,12 +2,9 @@ services:
   cloudcli:
     container_name: ${CONTAINER_NAME:-cloudcli}
     image: ghcr.io/huangyxi/cloudcli:latest
-    userns_mode: keep-id
+    userns_mode: keep-id:uid=1000,gid=1000
     ports:
       - "${SERVER_PORT:-3001}:3001"
-    environment:
-      - HOST_UID=${HOST_UID:-1000}
-      - HOST_GID=${HOST_GID:-1000}
     volumes:
       - ./workspace:/home/node:Z
       - ./claude:/home/node/.claude:Z

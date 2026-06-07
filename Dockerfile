@@ -48,7 +48,7 @@ RUN	--mount=type=cache,target=/root <<EOF
 	for plugin_dir in ${PLUGINS_DIR}/*; do
 		echo "Building plugin: ${plugin_dir}";
 		cd ${plugin_dir}
-		npm ci
+		npm install
 		npm run build
 		npm prune --production
 	done

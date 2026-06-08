@@ -8,7 +8,8 @@ git_clone() {
 	git clone --depth 1 "$@"
 }
 
-git_clone --branch ${CLOUDCLI_REF} https://github.com/siteboon/claudecodeui.git "${CLOUDCLI_DIR}"
+# `git clone --revision` is only supported in git 2.49+
+git_clone --revision=${CLOUDCLI_REF} https://github.com/siteboon/claudecodeui.git "${CLOUDCLI_DIR}"
 
 mkdir -p "${PLUGINS_DIR}"
 cd "${PLUGINS_DIR}"

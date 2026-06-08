@@ -86,7 +86,7 @@ EOF
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
 	apt-get update
-	apt-get --no-install-recommends install -y jq less ripgrep unzip vim
+	apt-get --no-install-recommends install -y jq less openssh-client openssh unzip vim
 EOF
 RUN	<<EOF
 	echo "source /etc/skel/.bashrc" | su - node -c "tee ~/.bashrc"

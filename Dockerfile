@@ -68,7 +68,7 @@ RUN	--mount=type=cache,target=/root <<EOF
 EOF
 
 
-FROM build AS node_modules
+FROM	build AS node_modules
 ARG	CLAUDE_CODE_VERSION
 RUN	<<EOF
 	npm approve-scripts --all || true
@@ -110,4 +110,4 @@ ENV	PLUGINS_DIR=${PLUGINS_DIR}
 COPY	--link ./entrypoint.sh /
 ENTRYPOINT	["/entrypoint.sh"]
 
-CMD	${ALL_PROXY}
+CMD	${APP_PATH}

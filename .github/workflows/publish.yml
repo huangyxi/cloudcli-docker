@@ -12,6 +12,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      claude_code_version:
+        description: 'Specify a custom version of @anthropic-ai/claude-code to build with (e.g., "2.1.168")'
+        required: false
+        default: 'latest'
 
 env:
   REGISTRY: ghcr.io
@@ -37,6 +42,10 @@ jobs:
           if [ "${{ github.ref_type }}" = "tag" ]; then
             echo "CLOUDCLI_REF=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
+          CLAUDE_CODE_VERSION='${{ github.event.inputs.claude_code_version }}'
+          [[ $CLAUDE_CODE_VERSION == latest ]] &&
+            CLAUDE_CODE_VERSION="$(npm view @anthropic-ai/claude-code version)"
+          echo "CLAUDE_CODE_VERSION=$CLAUDE_CODE_VERSION" >> "$GITHUB_ENV"
       - name: Extract metadata for Docker images
         id: meta
         uses: docker/metadata-action@v6
@@ -78,6 +87,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
+          build-args: |
+            CLAUDE_CODE_VERSION=${{ env.CLAUDE_CODE_VERSION }}
           context: .
           platforms: ${{ matrix.platform.arch }}
           push: ${{ github.event_name != 'pull_request' }}

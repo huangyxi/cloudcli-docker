@@ -3,15 +3,17 @@
 ARG	LOCAL_CLOUDCLI_PATH=./cloudcli
 ARG	LOCAL_PLUGINS_PATH=./plugins
 
+ARG CLAUDE_CODE_VERSION="latest"
 ARG	NODE_VERSION="24"
 ARG	APP_DIR="/app" PLUGINS_DIR="/opt/_cloudcli_plugins"
+ARG	APP_PATH=${APP_DIR}/node_modules/.bin/cloudcli
 ARG	VITE_IS_PLATFORM=true
 
 FROM	node:${NODE_VERSION}-trixie-slim AS base
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
 	apt-get update
-	apt-get --no-install-recommends install -y ca-certificates git python3 curl vim
+	apt-get --no-install-recommends install -y ca-certificates git python3
 EOF
 # ARG	NODE_VERSION
 # RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -19,7 +21,7 @@ EOF
 # 	curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
 # 	apt-get --no-install-recommends install -y nodejs
 # EOF
-ARG	APP_DIR PLUGINS_DIR
+ARG	APP_DIR PLUGINS_DIR APP_PATH
 ARG	VITE_IS_PLATFORM
 
 
@@ -45,6 +47,7 @@ RUN	<<EOF
 	npm install --prefix ${APP_DIR} "${PACKFILE}"
 	rm -rf ${TMP_DIR}
 EOF
+RUN test -x ${APP_PATH}
 RUN	echo "VITE_IS_PLATFORM=${VITE_IS_PLATFORM}" > ${APP_DIR}/node_modules/@cloudcli-ai/cloudcli/.env
 
 
@@ -65,15 +68,39 @@ RUN	--mount=type=cache,target=/root <<EOF
 EOF
 
 
-FROM	base
+FROM build AS node_modules
+ARG	CLAUDE_CODE_VERSION
 RUN	<<EOF
 	npm approve-scripts --all || true
-	npm install -g @anthropic-ai/claude-code task-master-ai
+	npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} task-master-ai
 	npm cache clean --force
+EOF
+
+
+FROM	base
+RUN	<<EOF
+	curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL=/usr/local/bin sh
+EOF
+RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
+	--mount=type=cache,target=/var/lib/apt,sharing=locked <<EOF
+	apt-get update
+	apt-get --no-install-recommends install -y jq less ripgrep unzip vim
+EOF
+RUN	<<EOF
+	echo "source /etc/skel/.bashrc" >> su - node -c "tee ~/.bashrc"
+EOF
+
+RUN	<<EOF
+	cd /usr/local/bin
+	ln -sf ../lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe claude
+	ln -sf ../lib/node_modules/task-master-ai/dist/task-master.js task-master
+	ln -sf ../lib/node_modules/task-master-ai/dist/mcp-server.js task-master-ai
+	ln -sf ../lib/node_modules/task-master-ai/dist/mcp-server.js task-master-mcp
 EOF
 
 COPY	--from=app-builder --link ${APP_DIR} ${APP_DIR}
 COPY	--from=plugin-builder --link ${PLUGINS_DIR} ${PLUGINS_DIR}
+COPY	--from=node_modules --link /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 EXPOSE	3001
 
@@ -83,4 +110,4 @@ ENV	PLUGINS_DIR=${PLUGINS_DIR}
 COPY	--link ./entrypoint.sh /
 ENTRYPOINT	["/entrypoint.sh"]
 
-CMD	["/app/node_modules/.bin/cloudcli"]
+CMD	${ALL_PROXY}

@@ -190,6 +190,7 @@ jobs:
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           package: cloudcli
+          older-than: 3 days
       - name: Delete cache images from GHCR
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:

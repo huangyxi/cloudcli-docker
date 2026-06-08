@@ -39,8 +39,8 @@ ARG	LOCAL_CLOUDCLI_PATH
 ADD	${LOCAL_CLOUDCLI_PATH} ${TMP_DIR}
 WORKDIR	${TMP_DIR}
 RUN	<<EOF
-	npm approve-scripts --all || true
-	npm install
+	npm approve-scripts --all 2> /dev/null || true
+	npm ci 2> /dev/null || npm install
 	npm run build
 	PACKFILE=$(npm pack --silent)
 	echo "${PACKFILE}"
@@ -62,8 +62,8 @@ RUN	--mount=type=cache,target=/root <<EOF
 	for plugin_dir in ${PLUGINS_DIR}/*; do
 		echo "Building plugin: ${plugin_dir}";
 		cd ${plugin_dir}
-		npm approve-scripts --all || true
-		npm install
+		npm approve-scripts --all 2> /dev/null || true
+		npm ci 2> /dev/null || npm install
 		npm run build
 		npm prune --production
 	done
@@ -73,7 +73,7 @@ EOF
 FROM	build AS node_modules
 ARG	CLAUDE_CODE_VERSION
 RUN	<<EOF
-	npm approve-scripts --all || true
+	npm approve-scripts --all 2> /dev/null || true
 	npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} task-master-ai
 	npm cache clean --force
 EOF

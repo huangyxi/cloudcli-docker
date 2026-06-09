@@ -10,4 +10,14 @@ services:
       - ./claude:/home/node/.claude:Z
       - ./cloudcli-config:/home/node/.cloudcli:Z
       # - ./cloudcli-workspace-scheduled-prompts:/home/node/.cloudcli-workspace-scheduled-prompts:Z
+
+
+      # https://github.com/shinpr/mcp-local-rag Add `/opt/mcp-local-rag/dist/index.js` with `CACHE_DIR=/opt/models` as MCP
+      # npm config set prefix ~/.local
+      # npm install --global mcp-local-rag
+      # - ~/.local/lib/node_modules/mcp-local-rag:/opt/mcp-local-rag:ro
+      # - ~/.local/bin/mcp-local-rag:/usr/local/bin/mcp-local-rag:ro
+      # uvx hf download --local-dir ./models --include "*.json" --include "onnx/model_int8.onnx" Xenova/multilingual-e5-small
+      # ln -sf model_int8.onnx models/onnx/model.onnx
+      # - ./models:/opt/models/Xenova/all-MiniLM-L6-v2:ro
     restart: unless-stopped

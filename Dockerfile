@@ -3,7 +3,7 @@
 ARG	LOCAL_CLOUDCLI_PATH=./cloudcli
 ARG	LOCAL_PLUGINS_PATH=./plugins
 
-ARG CLAUDE_CODE_VERSION="latest"
+ARG	CLAUDE_CODE_VERSION="latest"
 ARG	NODE_VERSION="24"
 ARG	APP_DIR="/app" PLUGINS_DIR="/opt/_cloudcli_plugins"
 ARG	APP_PATH=${APP_DIR}/node_modules/.bin/cloudcli
@@ -47,8 +47,8 @@ RUN	<<-EOF
 	npm install --prefix ${APP_DIR} "${PACKFILE}"
 	rm -rf ${TMP_DIR}
 EOF
-RUN test -x ${APP_PATH}
-COPY --link <<-EOF ${APP_DIR}/node_modules/@cloudcli-ai/cloudcli/.env
+RUN	test -x ${APP_PATH}
+COPY	--link <<-EOF ${APP_DIR}/node_modules/@cloudcli-ai/cloudcli/.env
 	VITE_IS_PLATFORM=${VITE_IS_PLATFORM}
 EOF
 

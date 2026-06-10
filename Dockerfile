@@ -13,7 +13,7 @@ FROM	node:${NODE_VERSION}-trixie-slim AS base
 RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt,sharing=locked <<-EOF
 	apt-get update
-	apt-get --no-install-recommends install -y ca-certificates git python3
+	apt-get --no-install-recommends install -y ca-certificates git python3 curl
 EOF
 # ARG	NODE_VERSION
 # RUN	--mount=type=cache,target=/var/cache/apt,sharing=locked \

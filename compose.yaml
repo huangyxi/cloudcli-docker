@@ -12,7 +12,8 @@ services:
       # - ./cloudcli-workspace-scheduled-prompts:/home/node/.cloudcli-workspace-scheduled-prompts:Z
 
 
-      # https://github.com/shinpr/mcp-local-rag Add `/opt/mcp-local-rag/dist/index.js` with `CACHE_DIR=/opt/models` as MCP
+      # https://github.com/shinpr/mcp-local-rag
+      # Add `/opt/mcp-local-rag/dist/index.js` with `CACHE_DIR=/opt/models` as MCP
       # npm config set prefix ~/.local
       # npm install --global mcp-local-rag
       # - ~/.local/lib/node_modules/mcp-local-rag:/opt/mcp-local-rag:ro
@@ -20,4 +21,9 @@ services:
       # uvx hf download --local-dir ./models --include "*.json" --include "onnx/model_int8.onnx" Xenova/multilingual-e5-small
       # ln -sf model_int8.onnx models/onnx/model.onnx
       # - ./models:/opt/models/Xenova/all-MiniLM-L6-v2:ro
+
+      # https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp
+      # Add `python3` with args `/opt/markitdown-mcp/bin/markitdown-mcp` end envs `PYTHONPATH=/opt/markitdown-mcp/lib/python3.13/site-packages` as MCP
+      # uv tool install --python 3.13 markitdown-mcp
+      # - ~/.local/share/uv/tools/markitdown-mcp:/opt/markitdown-mcp:ro
     restart: unless-stopped

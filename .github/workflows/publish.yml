@@ -40,9 +40,12 @@ jobs:
       - name: Prepare environment variables
         run: |
           echo "FULL_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
+          CLOUDCLI_REF='main'
           if [ "${{ github.ref_type }}" = "tag" ]; then
-            echo "CLOUDCLI_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+            "CLOUDCLI_REF=${{ github.ref_name }}"
           fi
+          echo "CLOUDCLI_REF=$CLOUDCLI_REF" >> $GITHUB_ENV
+          echo "CLOUDCLI_HEAD=$(git -c http.version=2 ls-remote https://github.com/siteboon/claudecodeui.git HEAD | awk '{print $1}')" >> $GITHUB_ENV
           CLAUDE_CODE_VERSION='${{ github.event.inputs.claude_code_version }}'
           CLAUDE_CODE_VERSION="${CLAUDE_CODE_VERSION:-latest}"
           [[ $CLAUDE_CODE_VERSION == latest ]] &&
@@ -84,16 +87,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Install dependencies
-        run: ./prebuild.sh
-        env:
-          CLOUDCLI_REF: ${{ env.CLOUDCLI_REF }}
       - name: Build and push Docker image
         id: build
         uses: docker/build-push-action@v7
         with:
           build-args: |
             CLAUDE_CODE_VERSION=${{ env.CLAUDE_CODE_VERSION }}
+            CLOUDCLI_REF=${{ env.CLOUDCLI_REF }}
+            CLOUDCLI_HEAD=${{ env.CLOUDCLI_HEAD }}
           context: .
           platforms: ${{ matrix.platform.arch }}
           push: ${{ github.event_name != 'pull_request' }}

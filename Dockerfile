@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-ARG	LOCAL_CLOUDCLI_PATH=./cloudcli
-ARG	LOCAL_PLUGINS_PATH=./plugins
+ARG	CLOUDCLI_REF=main
 
 ARG	CLAUDE_CODE_VERSION="latest"
 ARG	NODE_VERSION="24"
@@ -35,8 +34,13 @@ EOF
 
 FROM	build AS app-builder
 ARG	TMP_DIR=/tmp/app
-ARG	LOCAL_CLOUDCLI_PATH
-ADD	${LOCAL_CLOUDCLI_PATH} ${TMP_DIR}
+ARG	CLOUDCLI_REF CLOUDCLI_HEAD
+RUN	echo "CLOUDCLI_HEAD=${CLOUDCLI_HEAD}"
+RUN	<<-EOF
+	mkdir -p ${TMP_DIR}
+	git clone --depth 1 --branch ${CLOUDCLI_REF} \
+		https://github.com/siteboon/claudecodeui.git ${TMP_DIR}
+EOF
 WORKDIR	${TMP_DIR}
 RUN	<<-EOF
 	npm approve-scripts --all 2> /dev/null || true
@@ -56,8 +60,9 @@ EOF
 FROM	build AS plugin-builder
 RUN	mkdir -p ${PLUGINS_DIR}
 WORKDIR	${PLUGINS_DIR}
-ARG	LOCAL_PLUGINS_PATH
-ADD	${LOCAL_PLUGINS_PATH} ${PLUGINS_DIR}/
+RUN	--mount=type=cache,target=/tmp/git-cache <<-'EOF'
+	git clone --depth 1 https://github.com/cloudcli-ai/cloudcli-plugin-terminal
+EOF
 RUN	--mount=type=cache,target=/root <<-EOF
 	for plugin_dir in ${PLUGINS_DIR}/*; do
 		echo "Building plugin: ${plugin_dir}";

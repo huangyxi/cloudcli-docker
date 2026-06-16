@@ -71,6 +71,7 @@ jobs:
           tags: |
             type=ref,event=branch
             ${{ github.ref_type == 'tag' && 'type=raw,value=main' || '' }}
+            ${{ github.event_name == 'pull_request' && 'type=ref,event=pr' || '' }}
           flavor: |
             prefix=cache-${{ matrix.platform.arch }}-
             latest=false

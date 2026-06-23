@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-ARG	CLOUDCLI_REF=main
+ARG	CLOUDCLI_REF=main CLOUDCLI_HEAD=""
 
 ARG	CLAUDE_CODE_VERSION="latest"
 ARG	NODE_VERSION="24"
@@ -60,7 +60,7 @@ EOF
 FROM	build AS plugin-builder
 RUN	mkdir -p ${PLUGINS_DIR}
 WORKDIR	${PLUGINS_DIR}
-RUN	--mount=type=cache,target=/tmp/git-cache <<-'EOF'
+RUN	--mount=type=cache,target=/tmp/git-cache <<-EOF
 	git clone --depth 1 https://github.com/cloudcli-ai/cloudcli-plugin-terminal
 EOF
 RUN	--mount=type=cache,target=/root <<-EOF

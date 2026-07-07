@@ -2,7 +2,7 @@
 
 ARG	CLOUDCLI_REF=main CLOUDCLI_HEAD=""
 
-ARG	CLAUDE_CODE_VERSION="latest"
+ARG	CLAUDE_CODE_VERSION="latest" CODEX_VERSION="latest" OPENCODE_VERSION="latest"
 ARG	NODE_VERSION="24"
 ARG	APP_DIR="/app" PLUGINS_DIR="/opt/_cloudcli_plugins"
 ARG	APP_PATH=${APP_DIR}/node_modules/.bin/cloudcli
@@ -76,10 +76,10 @@ EOF
 
 
 FROM	build AS node_modules
-ARG	CLAUDE_CODE_VERSION
+ARG	CLAUDE_CODE_VERSION CODEX_VERSION OPENCODE_VERSION
 RUN	<<-EOF
 	npm approve-scripts --all 2> /dev/null || true
-	npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} task-master-ai
+	npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} @openai/codex@${CODEX_VERSION} opencode-ai@${OPENCODE_VERSION} task-master-ai
 	npm cache clean --force
 EOF
 
@@ -100,6 +100,8 @@ EOF
 RUN	<<-EOF
 	cd /usr/local/bin
 	ln -sf ../lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe claude
+	ln -sf ../lib/node_modules/@openai/codex/bin/codex.js codex
+	ln -sf ../lib/node_modules/opencode-ai/bin/opencode.exe opencode
 	ln -sf ../lib/node_modules/task-master-ai/dist/task-master.js task-master
 	ln -sf ../lib/node_modules/task-master-ai/dist/mcp-server.js task-master-ai
 	ln -sf ../lib/node_modules/task-master-ai/dist/mcp-server.js task-master-mcp

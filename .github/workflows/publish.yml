@@ -17,6 +17,14 @@ on:
         description: 'Specify a custom version of @anthropic-ai/claude-code to build with (e.g., "2.1.168")'
         required: false
         default: 'latest'
+      codex_version:
+        description: 'Specify a custom version of @openai/codex to build with (e.g., "1.0.0")'
+        required: false
+        default: 'latest'
+      opencode_version:
+        description: 'Specify a custom version of opencode to build with (e.g., "1.0.0")'
+        required: false
+        default: 'latest'
 
 env:
   REGISTRY: ghcr.io
@@ -51,6 +59,16 @@ jobs:
           [[ $CLAUDE_CODE_VERSION == latest ]] &&
             CLAUDE_CODE_VERSION="$(npm view @anthropic-ai/claude-code version)"
           echo "CLAUDE_CODE_VERSION=$CLAUDE_CODE_VERSION" >> "$GITHUB_ENV"
+          CODEX_VERSION='${{ github.event.inputs.codex_version }}'
+          CODEX_VERSION="${CODEX_VERSION:-latest}"
+          [[ $CODEX_VERSION == latest ]] &&
+            CODEX_VERSION="$(npm view @openai/codex version)"
+          echo "CODEX_VERSION=$CODEX_VERSION" >> "$GITHUB_ENV"
+          OPENCODE_VERSION='${{ github.event.inputs.opencode_version }}'
+          OPENCODE_VERSION="${OPENCODE_VERSION:-latest}"
+          [[ $OPENCODE_VERSION == latest ]] &&
+            OPENCODE_VERSION="$(npm view opencode-ai version)"
+          echo "OPENCODE_VERSION=$OPENCODE_VERSION" >> "$GITHUB_ENV"
           platform=${{ matrix.platform.arch }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> ${GITHUB_ENV}
       - name: Extract metadata for Docker images
@@ -94,6 +112,8 @@ jobs:
         with:
           build-args: |
             CLAUDE_CODE_VERSION=${{ env.CLAUDE_CODE_VERSION }}
+            CODEX_VERSION=${{ env.CODEX_VERSION }}
+            OPENCODE_VERSION=${{ env.OPENCODE_VERSION }}
             CLOUDCLI_REF=${{ env.CLOUDCLI_REF }}
             CLOUDCLI_HEAD=${{ env.CLOUDCLI_HEAD }}
           context: .

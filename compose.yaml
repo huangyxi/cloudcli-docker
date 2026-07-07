@@ -8,6 +8,9 @@ services:
     volumes:
       - ./workspace:/home/node:Z
       - ./claude:/home/node/.claude:Z
+      # - ./codex:/home/node/.codex:Z
+      # - ./opencode-config:/home/node/.config/opencode:Z
+      # - ./opencode-shared:/home/node/.local/share/opencode:Z
       - ./cloudcli-config:/home/node/.cloudcli:Z
       # - ./cloudcli-workspace-scheduled-prompts:/home/node/.cloudcli-workspace-scheduled-prompts:Z
 

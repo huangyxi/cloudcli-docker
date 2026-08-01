@@ -3,6 +3,7 @@ services:
     container_name: ${CONTAINER_NAME:-cloudcli}
     image: ghcr.io/huangyxi/cloudcli:latest
     userns_mode: keep-id:uid=1000,gid=1000
+    init: true
     ports:
       - "${SERVER_PORT:-3001}:3001"
     volumes:
